@@ -1,79 +1,62 @@
-------------------------
-/ by Gabriel Silva 🤓 /
-------------------------
+#define led1 3
+#define led2 2
+#define timer1 4
+#define timer2 5
+#define buz 6
+#define rele 12
 
-#include <Arduino.h>
-
-const int buttonPin = 2;    // Pino do botão
-const int buzzerPin = 3;    // Pino do buzzer
-const int ledPin = 4;       // Pino do LED
-const int endSwitchPin = 5; // Pino da chave de fim de curso
-
-bool buttonPressed = false;
-bool buzzerActive = false;
-bool ledActive = false;
+int delai = 0;
+int lgd, chu;
 
 void setup() {
-  pinMode(buttonPin, INPUT_PULLUP);
-  pinMode(buzzerPin, OUTPUT);
-  pinMode(ledPin, OUTPUT);
-  pinMode(endSwitchPin, INPUT_PULLUP);
-  digitalWrite(buzzerPin, LOW);
-  digitalWrite(ledPin, LOW);
+  pinMode(led1, OUTPUT);
+  pinMode(led2, OUTPUT);
+  pinMode(rele, OUTPUT);
+  pinMode(timer2, INPUT);
+  pinMode(timer1, INPUT);
+  pinMode(buz, OUTPUT);
   Serial.begin(9600);
 }
 
 void loop() {
-  // Verifica se o botão foi pressionado por 3 segundos
-  if (digitalRead(buttonPin) == LOW) {
-    delay(3000);  // Espera por 3 segundos
-    if (digitalRead(buttonPin) == LOW) {
-      buttonPressed = true;
-    }
-  }
+  digitalRead(timer1);
+  while (!digitalRead(timer1)) {
+    Serial.println(digitalRead(timer1));
+    delay(1);
+    delai += 1;
 
-  if (buttonPressed) {
-    // Ativa o buzzer para bipar 3 vezes
-    for (int i = 0; i < 3; i++) {
-      digitalWrite(buzzerPin, HIGH);
-      delay(200);  // Bipa por 200ms
-      digitalWrite(buzzerPin, LOW);
-      delay(200);  // Pausa de 200ms entre os bips
-    }
-    buttonPressed = false;
-    buzzerActive = true;
-  }
+    if (delai >= 2000) {
+      digitalWrite(rele, HIGH);
 
-  // Verifica se o buzzer está ativo e o LED não
-  if (buzzerActive && !ledActive) {
-    // Pisca o LED vermelho por 10 segundos
-    for (int i = 0; i < 100; i++) {
-      digitalWrite(ledPin, HIGH);
-      delay(100);
-      digitalWrite(ledPin, LOW);
-      delay(100);
-    }
-    buzzerActive = false;
-    ledActive = true;
-  }
+      for (int i = 0; i < 3; i++) {
+        tone(8, 330, 8000);
+        digitalWrite(buz, HIGH);
+        delay(100);
+        digitalWrite(buz, LOW);
+        delay(100);
+      }
 
-  // Verifica se o LED está ativo e a chave de fim de curso foi acionada
-  if (ledActive && digitalRead(endSwitchPin) == LOW) {
-    // Ativa o LED verde
-    digitalWrite(ledPin, HIGH);
-  } else {
-    digitalWrite(ledPin, LOW);
-  }
-
-  // Verifica se o LED está ativo
-  if (ledActive) {
-    // Ativa o buzzer para bipar 2 vezes
-    for (int i = 0; i < 2; i++) {
-      digitalWrite(buzzerPin, HIGH);
-      delay(200);  // Bipa por 200ms
-      digitalWrite(buzzerPin, LOW);
-      delay(200);  // Pausa de 200ms entre os bips
+      unsigned long startTime = millis();
+        while (millis() - startTime < 180000) {
+          digitalWrite(led1, HIGH);
+          delay(500);
+          digitalWrite(led1, LOW);
+          delay(500);
     }
-    ledActive = false;
+
+      for (int i = 0; i < 3; i++) {
+        digitalWrite(led1, HIGH);
+        delay(500);
+        digitalWrite(led1, LOW);
+        delay(500);
+      }
+
+      digitalWrite(rele, LOW);
+      delai = 0;
+    }
+
+    while (!digitalRead(timer2)) {
+      // ... (restante do código, conforme você desejar)
+    }
   }
 }
